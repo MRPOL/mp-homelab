@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    command:
+      # --certificatesresolvers.<name> Certificates resolvers configuration
+      # ACME V2 supports wildcard certificates.
+      # Wildcard certificates can only be generated through a DNS-01 challenge.
+      - --certificatesresolvers.wildcard-godaddy.acme.tlschallenge=true
+      - --certificatesResolvers.wildcard-godaddy.acme.dnsChallenge.provider=godaddy
+      - --certificatesResolvers.wildcard-godaddy.acme.dnsChallenge.delayBeforeCheck=0
+      # Email address used for registration.
+      - --certificatesresolvers.wildcard-godaddy.acme.email=marco@mrpol.nl
+      # Certificates storage
+      - --certificatesresolvers.wildcard-godaddy.acme.storage=/data/acme.json
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - GODADDY_API_KEY=dLiaUHyDdajr_PjRMB5sFCAKHGFxEdufq8
+      - GODADDY_API_SECRET=NGiWpHTciufEpAvFh4XyPy
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/mpol/traefik/data/traefik.yml:/traefik.yml:ro
+      - /home/mpol/traefik/data/acme.json:/acme.json
+      - /home/mpol/traefik/data/config.yml:/config.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik-dashboard.local.mrpol.eu`)"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=mpol:$$apr1$$TNUzgEPg$$gX9KU3K5flFW0ErFaIrze/"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik-dashboard.local.mrpol.eu`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=godaddy"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=local.mrpol.eu"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.local.mrpol.eu"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+
+networks:
+  proxy:
+    external: true
