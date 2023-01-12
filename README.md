@@ -9,3 +9,6 @@ Portainer container.
 
 ## Heimdall
 Heimdall container voor een intern dashboard.
+
+## Overseerr
+Overseerr container toegevoegt voor en toevoegen van Series en Films.
