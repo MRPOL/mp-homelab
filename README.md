@@ -6,3 +6,6 @@ Traefik container incl. GoDaddy lets encrypt certificaat aanvraag voor local.mrp
 
 ## portainer
 Portainer container.
+
+## Heimdall
+Heimdall container voor een intern dashboard.
