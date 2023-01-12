@@ -10,7 +10,7 @@ services:
       - PGID=1000
       - TZ=Europe/Amsterdam
     volumes:
-      - /path/to/appdata/config:/data
+      - /home/mpol/heimdall/config:/config
     networks:
       - proxy
     labels:
